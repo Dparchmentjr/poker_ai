@@ -1,7 +1,7 @@
 import random
 from kuhn3p import betting, deck, Player
 import itertools
-from .player_utilities import UTILITY_DICT
+from player_utilities import UTILITY_DICT
 
 hand = [deck.JACK, deck.QUEEN, deck.KING, deck.ACE]
 handperm = list(itertools.permutations(hand, 3))
@@ -300,7 +300,7 @@ class SmartAgent(Player):
             for a in Actions[h]:
                 actionregret = self.tree[self.tree_index][h]['regrets'][a]
                 regretsum = sum(self.tree[self.tree_index][h]['regrets'].values())
-                print(regretsum, actionregret, list(self.tree[self.tree_index][h]['regrets'].values()))
+                print regretsum, actionregret, self.tree[self.tree_index][h]['regrets'].values()
                 profile[h][a] = max([0, actionregret]) / \
                     regretsum if regretsum > 0 else 0.5
 

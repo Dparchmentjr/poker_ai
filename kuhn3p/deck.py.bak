@@ -24,7 +24,7 @@ def string_to_card(string):
 	return __card_to_string.find(string)
 
 def shuffled(rng=random.Random()):
-	cards = list(range(num_cards()))
+	cards = range(num_cards())
         rng.shuffle(cards)
 	return cards
 

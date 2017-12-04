@@ -5,7 +5,7 @@ rng         = Random()
 rng.seed(31337)  # each seed corresponds to a different set of hands
 
 num_hands   = 3000
-the_players = [players.Chump(0.99, 0.01, 0.0), 
+the_players = [players.SmartAgent(), 
     players.Chump(0.99, 0.01, 0.0), 
     players.Bluffer(0.2) ]
 

@@ -1,7 +1,7 @@
 import random
-import kuhn3p
+from kuhn3p import Player, betting
 
-class Chump(kuhn3p.Player):
+class Chump(Player):
 	def __init__(self, bet, call, fold, rng=random.Random()):
 		assert bet >= 0
 		assert call >= 0
@@ -14,7 +14,7 @@ class Chump(kuhn3p.Player):
 		self.rng = rng 
 
 	def act(self, state, card):
-		if kuhn3p.betting.can_bet(state):
+		if betting.can_bet(state):
 			p = self.p1
 		else:
 			p = self.p2

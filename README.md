@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 kuhn3p
 ======
 
@@ -48,3 +49,6 @@ bots written to interact with the regular dealer.
 I will also be adding code to run a tournament within this package.  You
 will be able to choose the bots you enter, and it will run the matches
 required to get statistical significance.
+=======
+# poker_ai
+>>>>>>> 16edb1fa5d127b2796fa0958552a6eef7aacb0e8

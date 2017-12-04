@@ -1,6 +1,7 @@
 import random
 from kuhn3p import betting, deck
 import itertools
+from Player_Utilities import *
 
 hand = [deck.JACK, deck.QUEEN, deck.KING, deck.ACE]
 handperm = itertools.permutations(hand, 3)
@@ -233,3 +234,6 @@ class Player(object):
 
     def get_action_profile(self, t, h, a):
         return self.tree['profile'][t][h][a]
+
+	def utility(self, h, i, hand):
+        return UTILITY_DICT.get(h)(i, hand)

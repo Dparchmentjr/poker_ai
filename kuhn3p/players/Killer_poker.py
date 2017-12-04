@@ -34,77 +34,77 @@ Actions = {
 }
 
 Profile = [{
-    'k':{ 
+    'k': {
         'player': 1,
         'profile': {
             'k': 0.5,
             'b': 0.5
         }
     },
-    'kk': { 
+    'kk': {
         'player': 2,
         'profile': {
             'k': 0.5,
             'b': 0.5
         }
     },
-    'kkb': { 
+    'kkb': {
         'player': 0,
         'profile': {
             'f': 0.5,
             'c': 0.5
         }
     },
-    'kkbc': { 
+    'kkbc': {
         'player': 1,
         'profile': {
             'f': 0.5,
             'c': 0.5
         }
     },
-    'kkbf': { 
+    'kkbf': {
         'player': 1,
         'profile': {
             'f': 0.5,
             'c': 0.5
         }
     },
-    'kb': { 
+    'kb': {
         'player': 2,
         'profile': {
             'f': 0.5,
             'c': 0.5
         }
     },
-    'kbf': { 
+    'kbf': {
         'player': 0,
         'profile': {
             'f': 0.5,
             'c': 0.5
         }
     },
-    'kbc': { 
+    'kbc': {
         'player': 0,
         'profile': {
             'f': 0.5,
             'c': 0.5
         }
     },
-    'b': { 
+    'b': {
         'player': 1,
         'profile': {
             'f': 0.5,
             'c': 0.5
         }
     },
-    'bf': { 
+    'bf': {
         'player': 2,
         'profile': {
             'f': 0.5,
             'c': 0.5
         }
     },
-    'bc': { 
+    'bc': {
         'player': 2,
         'profile': {
             'f': 0.5,
@@ -113,122 +113,120 @@ Profile = [{
     }
 }]
 
-tree = []
-
-for _ in range(24):
-    tree.append({
-            'k': {
-                'strategy': {
-                    'k': 0,
-                    'b': 0
-                },
-                'regrets': {
-                    'k': 0,
-                    'b': 0
-                },
-            },
-            'kk': {
-                ''
-                'strategy': {
-                    'k': 0,
-                    'b': 0
-                },
-                'regrets': {
-                    'k': 0,
-                    'b': 0
-                },
-            },
-            'kkb': {
-                'strategy': {
-                    'f': 0,
-                    'c': 0
-                },
-                'regrets': {
-                    'f': 0,
-                    'c': 0
-                },
-            },
-            'kkbc': {
-                'strategy': {
-                    'f': 0,
-                    'c': 0
-                },
-                'regrets': {
-                    'f': 0,
-                    'c': 0
-                },
-            },
-            'kkbf': {
-                'strategy': {
-                    'f': 0,
-                    'c': 0
-                },
-                'regrets': {
-                    'f': 0,
-                    'c': 0
-                },
-            },
-            'kb': {
-                'strategy': {
-                    'f': 0,
-                    'c': 0
-                },
-                'regrets': {
-                    'f': 0,
-                    'c': 0
-                },
-            },
-            'kbf': {
-                'strategy': {
-                    'f': 0,
-                    'c': 0
-                },
-                'regrets': {
-                    'f': 0,
-                    'c': 0
-                },
-            },
-            'kbc': {
-                'strategy': {
-                    'f': 0,
-                    'c': 0
-                },
-                'regrets': {
-                    'f': 0,
-                    'c': 0
-                },
-            },
-            'b': {
-                'strategy': {
-                    'f': 0,
-                    'c': 0
-                },
-                'regrets': {
-                    'f': 0,
-                    'c': 0
-                },
-            },
-            'bf': {
-                'strategy': {
-                    'f': 0,
-                    'c': 0
-                },
-                'regrets': {
-                    'f': 0,
-                    'c': 0
-                },
-            },
-            'bc': {
-                'strategy': {
-                    'f': 0,
-                    'c': 0
-                },
-                'regrets': {
-                    'f': 0,
-                    'c': 0
-                },
-            }
-        })
+tree = {}
+treenode = {
+    'k': {
+        'strategy': {
+            'k': 0,
+            'b': 0
+        },
+        'regrets': {
+            'k': 0,
+            'b': 0
+        },
+    },
+    'kk': {
+        ''
+        'strategy': {
+            'k': 0,
+            'b': 0
+        },
+        'regrets': {
+            'k': 0,
+            'b': 0
+        },
+    },
+    'kkb': {
+        'strategy': {
+            'f': 0,
+            'c': 0
+        },
+        'regrets': {
+            'f': 0,
+            'c': 0
+        },
+    },
+    'kkbc': {
+        'strategy': {
+            'f': 0,
+            'c': 0
+        },
+        'regrets': {
+            'f': 0,
+            'c': 0
+        },
+    },
+    'kkbf': {
+        'strategy': {
+            'f': 0,
+            'c': 0
+        },
+        'regrets': {
+            'f': 0,
+            'c': 0
+        },
+    },
+    'kb': {
+        'strategy': {
+            'f': 0,
+            'c': 0
+        },
+        'regrets': {
+            'f': 0,
+            'c': 0
+        },
+    },
+    'kbf': {
+        'strategy': {
+            'f': 0,
+            'c': 0
+        },
+        'regrets': {
+            'f': 0,
+            'c': 0
+        },
+    },
+    'kbc': {
+        'strategy': {
+            'f': 0,
+            'c': 0
+        },
+        'regrets': {
+            'f': 0,
+            'c': 0
+        },
+    },
+    'b': {
+        'strategy': {
+            'f': 0,
+            'c': 0
+        },
+        'regrets': {
+            'f': 0,
+            'c': 0
+        },
+    },
+    'bf': {
+        'strategy': {
+            'f': 0,
+            'c': 0
+        },
+        'regrets': {
+            'f': 0,
+            'c': 0
+        },
+    },
+    'bc': {
+        'strategy': {
+            'f': 0,
+            'c': 0
+        },
+        'regrets': {
+            'f': 0,
+            'c': 0
+        }
+    }
+}
 
 
 class SmartAgent(Player):
@@ -236,18 +234,22 @@ class SmartAgent(Player):
         self.player = -1
         self.card = -1
         self.tree = tree
-        self.tree_index = -1
+        self.hand_index = -1
+        self.training_hand = ()
 
     def start_hand(self, position, card):
         self.player = position
         self.card = card
-        iterations = 10
+        iterations = 50
         i = 0
         for t in range(iterations):
             while i < 3:
                 self.cfr('', i, t, 1, 1)
                 i += 1
-        # print len(Profile), Profile[8] 
+        latest_profile = Profile[len(Profile) - 1]
+        print len(latest_profile)
+        for node in latest_profile:
+            print node, latest_profile[node]
 
     def act(self, state, card):
         betting.BET
@@ -267,14 +269,18 @@ class SmartAgent(Player):
         """
         if not h:
             a = random.choice(['k', 'b'])
-            self.tree_index = random.randint(0, 23)
             number = self.cfr(h + a, i, t, pi, pni)
             return number
         elif h not in Actions:
-            hand = [deck.JACK, deck.KING, deck.ACE]
+            hand_options = filter(
+                lambda x: x[self.player] == self.card, handperm)
+            hand = random.choice(hand_options)
+            self.hand_index = str(hand)
+            self.training_hand = hand
+            self.tree[self.hand_index] = treenode
             utility = self.utility(h, i, hand)
             return utility
-        
+
         vsigma = 0
 
         Vsigma = {
@@ -285,30 +291,39 @@ class SmartAgent(Player):
         }
 
         for a in Actions[h]:
-            Vsigma[a] = self.cfr(h + a, i, t, self.get_action_profile(t, h, a) * pi,  pni)
+            if Profile[t][h]['player'] == i:
+                Vsigma[a] = self.cfr(
+                    h + a, i, t, self.get_action_profile(t, h, a) * pi,  pni)
+            else:
+                Vsigma[a] = self.cfr(
+                    h + a, i, t, pi,  pni * self.get_action_profile(t, h, a))
+
             vsigma += self.get_action_profile(t, h, a) * Vsigma[a]
 
         if Profile[t][h]['player'] == i:
             for a in Actions[h]:
-                self.tree[self.tree_index][h]['regrets'][a] += pni * \
+                self.tree[self.hand_index][h]['regrets'][a] += pni * \
                     (Vsigma[a] - vsigma)
-                self.tree[self.tree_index][h]['strategy'][a] += pi * \
+                self.tree[self.hand_index][h]['strategy'][a] += pi * \
                     self.get_action_profile(t, h, a)
 
             profile = Profile[t]
 
             for a in Actions[h]:
-                actionregret = self.tree[self.tree_index][h]['regrets'][a]
-                regretsum = sum(self.tree[self.tree_index][h]['regrets'].values())
-                print regretsum, actionregret, self.tree[self.tree_index][h]['regrets'].values()
-                profile[h][a] = max([0, actionregret]) / \
+                actionregret = max(
+                    [self.tree[self.hand_index][h]['regrets'][a], 0])
+                values = self.tree[self.hand_index][h]['regrets'].values()
+                normalizedsum = list(map(lambda x: max([x, 0]), values))
+                regretsum = sum(normalizedsum)
+                profile[h]['profile'][a] = actionregret / \
                     regretsum if regretsum > 0 else 0.5
 
+            profile['hand'] = self.training_hand
+            profile['player'] = i
             Profile.append(profile)
         return vsigma
 
     def get_action_profile(self, t, h, a):
-        # print t, h, a
         profile = Profile[t][h]['profile'][a]
         return profile
 

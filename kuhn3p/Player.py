@@ -10,5 +10,3 @@ class Player(object):
 
     def end_hand(self, position, card, state, shown_cards):
         pass
-
-  

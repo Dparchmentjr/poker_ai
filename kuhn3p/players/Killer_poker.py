@@ -1,228 +1,206 @@
-import random, matplotlib.pyplot as plt 
+import random, matplotlib.pyplot as plt, math
 from kuhn3p import betting, deck, Player
 import itertools
-from player_utilities import UTILITY_DICT
+from .player_utilities import UTILITY_DICT
 
 hand = [deck.JACK, deck.QUEEN, deck.KING, deck.ACE]
 handperm = list(itertools.permutations(hand, 3))
 
 Actions = {
-    'k': ('k', 'b'),
-    'kk': ('k', 'b'),
-    # 'kkk': (),
-    'kkb': ('c', 'f'),
-    'kkbc': ('c', 'f'),
-    'kkbf': ('c', 'f'),
-    # 'kkbcc': (),
-    # 'kkbcf': (),
-    # 'kkbfc': (),
-    # 'kkbff': (),
-    'kb': ('f', 'c'),
-    'kbf': ('f', 'c'),
-    # 'kbff': (),
-    # 'kbfc': (),
-    'kbc': ('f', 'c'),
-    # 'kbcf': (),
-    # 'kbcc': (),
-    'b': ('f', 'c'),
-    'bf': ('f', 'c'),
-    # 'bfc': (),
-    # 'bff': (),
-    'bc': ('f', 'c'),
-    # 'bcc': (),
-    # 'bcf': ()
+    'i': ('k', 'b'),
+    'ik': ('k', 'b'),
+    'ikk': ('k', 'b'),
+    'ikkb': ('c', 'f'),
+    'ikkbc': ('c', 'f'),
+    'ikkbf': ('c', 'f'),
+    'ikb': ('f', 'c'),
+    'ikbf': ('f', 'c'),
+    'ikbc': ('f', 'c'),
+    'ib': ('f', 'c'),
+    'ibf': ('f', 'c'),
+    'ibc': ('f', 'c'),
 }
 
-Profile = [{
-    'k': {
-        'player': 1,
-        'profile': {
-            'k': 0.5,
-            'b': 0.5
-        }
-    },
-    'kk': {
-        'player': 2,
-        'profile': {
-            'k': 0.5,
-            'b': 0.5
-        }
-    },
-    'kkb': {
-        'player': 0,
-        'profile': {
-            'f': 0.5,
-            'c': 0.5
-        }
-    },
-    'kkbc': {
-        'player': 1,
-        'profile': {
-            'f': 0.5,
-            'c': 0.5
-        }
-    },
-    'kkbf': {
-        'player': 1,
-        'profile': {
-            'f': 0.5,
-            'c': 0.5
-        }
-    },
-    'kb': {
-        'player': 2,
-        'profile': {
-            'f': 0.5,
-            'c': 0.5
-        }
-    },
-    'kbf': {
-        'player': 0,
-        'profile': {
-            'f': 0.5,
-            'c': 0.5
-        }
-    },
-    'kbc': {
-        'player': 0,
-        'profile': {
-            'f': 0.5,
-            'c': 0.5
-        }
-    },
-    'b': {
-        'player': 1,
-        'profile': {
-            'f': 0.5,
-            'c': 0.5
-        }
-    },
-    'bf': {
-        'player': 2,
-        'profile': {
-            'f': 0.5,
-            'c': 0.5
-        }
-    },
-    'bc': {
-        'player': 2,
-        'profile': {
-            'f': 0.5,
-            'c': 0.5
-        }
-    }
-}]
 
 tree = {
-    'k': {
-        'strategy': {
+    'i': {
+        'player': 0,        
+        'strategySum': {
             'k': 0,
             'b': 0
         },
-        'regrets': {
+        'regretSum': {
             'k': 0,
             'b': 0
         },
-    },
-    'kk': {
-        ''
         'strategy': {
+            'k': 0.5,
+            'b': 0.5
+        }
+    },
+    'ik': {
+        'player': 1,        
+        'strategySum': {
             'k': 0,
             'b': 0
         },
-        'regrets': {
+        'regretSum': {
             'k': 0,
             'b': 0
         },
-    },
-    'kkb': {
         'strategy': {
-            'f': 0,
-            'c': 0
-        },
-        'regrets': {
-            'f': 0,
-            'c': 0
-        },
+            'k':0.5,
+            'b': 0.5
+        }
     },
-    'kkbc': {
+    'ikk': {
+        'player': 2,        
+        'strategySum': {
+            'k': 0,
+            'b': 0
+        },
+        'regretSum': {
+            'k': 0,
+            'b': 0
+        },
         'strategy': {
-            'f': 0,
-            'c': 0
-        },
-        'regrets': {
-            'f': 0,
-            'c': 0
-        },
-    },
-    'kkbf': {
-        'strategy': {
-            'f': 0,
-            'c': 0
-        },
-        'regrets': {
-            'f': 0,
-            'c': 0
+            'k': 0.5,
+            'b': 0.5
         },
     },
-    'kb': {
+    'ikkb': {
+        'player': 0,        
+        'strategySum': {
+            'f': 0,
+            'c': 0
+        },
+        'regretSum': {
+            'f': 0,
+            'c': 0
+        },
         'strategy': {
-            'f': 0,
-            'c': 0
-        },
-        'regrets': {
-            'f': 0,
-            'c': 0
-        },
+            'f': 0.5,
+            'c': 0.5
+        }
     },
-    'kbf': {
+    'ikkbc': {
+        'player': 1,        
+        'strategySum': {
+            'f': 0,
+            'c': 0
+        },
+        'regretSum': {
+            'f': 0,
+            'c': 0
+        },
         'strategy': {
-            'f': 0,
-            'c': 0
-        },
-        'regrets': {
-            'f': 0,
-            'c': 0
-        },
+            'f': 0.5,
+            'c': 0.5
+        }
     },
-    'kbc': {
+    'ikkbf': {
+        'player': 1,        
+        'strategySum': {
+            'f': 0,
+            'c': 0
+        },
+        'regretSum': {
+            'f': 0,
+            'c': 0
+        },
         'strategy': {
-            'f': 0,
-            'c': 0
-        },
-        'regrets': {
-            'f': 0,
-            'c': 0
-        },
+            'f': 0.5,
+            'c': 0.5
+        }
     },
-    'b': {
+    'ikb': {
+        'player': 2,        
+        'strategySum': {
+            'f': 0,
+            'c': 0
+        },
+        'regretSum': {
+            'f': 0,
+            'c': 0
+        },
         'strategy': {
-            'f': 0,
-            'c': 0
-        },
-        'regrets': {
-            'f': 0,
-            'c': 0
-        },
+            'f': 0.5,
+            'c': 0.5
+        }
     },
-    'bf': {
+    'ikbf': {
+        'player': 0,        
+        'strategySum': {
+            'f': 0,
+            'c': 0
+        },
+        'regretSum': {
+            'f': 0,
+            'c': 0
+        },
         'strategy': {
-            'f': 0,
-            'c': 0
-        },
-        'regrets': {
-            'f': 0,
-            'c': 0
-        },
+            'f': 0.5,
+            'c': 0.5
+        }
     },
-    'bc': {
-        'strategy': {
+    'ikbc': {
+        'player': 0,        
+        'strategySum': {
             'f': 0,
             'c': 0
         },
-        'regrets': {
+        'regretSum': {
             'f': 0,
             'c': 0
+        },
+        'strategy': {
+            'f': 0.5,
+            'c': 0.5
+        }
+    },
+    'ib': {
+        'player': 1,        
+        'strategySum': {
+            'f': 0,
+            'c': 0
+        },
+        'regretSum': {
+            'f': 0,
+            'c': 0
+        },
+        'strategy': {
+            'f': 0.5,
+            'c': 0.5
+        }
+    },
+    'ibf': {
+        'player': 2,        
+        'strategySum': {
+            'f': 0,
+            'c': 0
+        },
+        'regretSum': {
+            'f': 0,
+            'c': 0
+        },
+        'strategy': {
+            'f': 0.5,
+            'c': 0.5
+        }
+    },
+    'ibc': {
+        'player': 2,        
+        'strategySum': {
+            'f': 0,
+            'c': 0
+        },
+        'regretSum': {
+            'f': 0,
+            'c': 0
+        },
+        'strategy': {
+            'f': 0.5,
+            'c': 0.5
         }
     }
 }
@@ -234,39 +212,45 @@ for a in Actions:
 
 class SmartAgent(Player):
     def __init__(self):
-        self.perfomance = []
+        super().__init__()
         self.player = -1
         self.card = -1
         self.tables = tree
-        self.strategy = Strategy
-        
-        iterations = 200
+        self.avg_strategy = Strategy
+        self.score_perf = []
 
+        iterations = 50
+        self.performance = [0 for _ in range(iterations)]
         for t in range(iterations):
-            i = 0        
+            i = 0
+            score = 0      
             while i < 3:
-                self.cfr('', i, t, 1, 1)
+                self.training_hand = random.choice(handperm)                
+                score = self.cfr('i', i, t, .5, 1)
                 i += 1
-            
-            self.perfomance.append(sum([sum(self.tables[k]['regrets'].values()) for k in self.tables]))
-            
+            self.score_perf.append(score)
 
-        # self.get_average_strategy()
-        
+        for i in self.tables:
+            print(i, self.tables[i])
+            
+        self.get_average_strategy()
 
-        plt.plot(self.perfomance)
+        for node in self.avg_strategy:
+            print(node, self.avg_strategy[node])
+
+        # plt.plot(self.score_perf)
+        plt.plot(self.performance)
         plt.show()
 
-        # for node in self.strategy:
-        #     print(node, self.strategy[node])
+      
 
     def start_hand(self, position, card):
         self.player = position
         self.card = card
 
     def act(self, state, card):
-        print('state:', state, card, self.player)
-        betting.BET
+        print(('state:', state, card, self.player))
+        return betting.BET
 
     def end_hand(self, position, card, state, shown_cards):
         pass
@@ -282,65 +266,77 @@ class SmartAgent(Player):
             pni: probability profile without player i
         """
         if h not in Actions:
-            # hand_options = filter(
-            #     lambda x: x[self.player] == self.card, handperm)
-            hand = random.choice(handperm)
-            utility = self.utility(h, i, hand)
-            return utility
+            return self.utility(h, i, self.training_hand)
 
         vsigma = 0
-        Vsigma = {}
-        for a in Actions:
-            Vsigma[a] = dict([[k, 0] for k in Actions[a]])
+        Vsigma = {
+            'c': 0,
+            'b': 0,
+            'k': 0,
+            'f': 0
+        }
 
-            
+        if self.tables[h]['player'] == i:
+            self.update_table(pi)
+        else:
+            self.update_table(pni)
+        
         for a in Actions[h]:
-            if Profile[t][h]['player'] == i:
-                Vsigma[h][a] = self.cfr(
-                    h + a, i, t, self.get_action_profile(t, h, a) * pi,  pni)
+            if self.tables[h]['player'] == i:
+                Vsigma[a] = self.cfr(
+                    h + a, i, t, self.tables[h]['strategy'][a] * pi, pni)
             else:
-                Vsigma[h][a] = self.cfr(
-                    h + a, i, t, pi,  pni * self.get_action_profile(t, h, a))
+                Vsigma[a] = self.cfr(
+                    h + a, i, t, pi, pni * self.tables[h]['strategy'][a])
 
-            vsigma += self.get_action_profile(t, h, a) * Vsigma[h][a]
+            vsigma += self.tables[h]['strategy'][a] * Vsigma[a]
 
-        if Profile[t][h]['player'] == i:
-            for a in Actions[h]:
-                regret = pni * (Vsigma[h][a] - vsigma)
-                self.tables[h]['regrets'][a] += regret
-                self.tables[h]['strategy'][a] += pi * \
-                    self.get_action_profile(t, h, a)
+        for a in Actions[h]:   
+            if self.tables[h]['player'] == i:        
+                regret = pni * (Vsigma[a] - vsigma)
+            else:
+                regret = pi * (Vsigma[a] - vsigma)
+                
+            assert not math.isnan(regret)
+            self.tables[h]['regretSum'][a] += regret
+            if t < 5:
+                print('iteration %s for node %s' % (t, h), self.tables[h]['strategySum'])
+            
 
-
-            profile = Profile[t]
-            normalization = 0
-            for a in Actions[h]:
-                actionregret = max([self.tables[h]['regrets'][a], 0])
-                normalization += actionregret
-
-            for a in Actions[h]:
-                profile[h]['profile'][a] /= normalization if normalization > 0 else 0.5
-                # self.tables[h]['strategy'][a] += pi * profile[h]['profile'][a]
-
-            Profile.append(profile)
+        self.performance[t] = vsigma
         return vsigma
 
-    def get_average_strategy(self):        
-        for h in Actions:  
-            normalization = 0 
+    def update_table(self, pi):
+        for h in Actions:
+            normalization = 0
+            actionregret = {
+                    'c': 0,
+                    'b': 0,
+                    'k': 0,
+                    'f': 0
+            }                     
             for a in Actions[h]:
-                normalization += self.tables[h]['strategy'][a]
+                actionregret[a] = max([self.tables[h]['regretSum'][a], 0])
+                normalization += actionregret[a]
 
             for a in Actions[h]:
-                self.strategy[h][a] = self.tables[h]['strategy'][a] / normalization if normalization > 0 else 0.5
+                self.tables[h]['strategy'][a] = actionregret[a] / normalization if normalization > 0 else 0.5
+                self.tables[h]['strategySum'][a] += pi * self.tables[h]['strategy'][a]
+                
+                    
 
-    def get_action_profile(self, t, h, a):
-        profile = Profile[t][h]['profile'][a]
-        return profile
+    def get_average_strategy(self):
+        for h in Actions:
+            normalization = 0
+            for a in Actions[h]:
+                normalization += self.tables[h]['strategySum'][a]
+
+            for a in Actions[h]:
+                self.avg_strategy[h][a] = self.tables[h]['strategySum'][a] / normalization if normalization > 0 else 0.5
+
 
     def utility(self, h, i, hand):
-        utility = UTILITY_DICT.get(h)(i, hand)
-        return utility
+        return UTILITY_DICT.get(h[1:])(i, hand)
 
     def __str__(self):
         return 'SmartAgeet'

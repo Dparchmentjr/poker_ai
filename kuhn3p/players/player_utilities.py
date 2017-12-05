@@ -1,10 +1,9 @@
-
-
 # KKK
 def utility_func1(i, hand):
     if list(hand).index(max(hand)) == i:
         return 2
     return -1
+
 
 # KKBFF
 def utility_func2(i, hand):
@@ -12,11 +11,13 @@ def utility_func2(i, hand):
         return 2
     return -1
 
+
 # KKBFC
 def utility_func3(i, hand):
     if list(hand).index(max(hand)) == i:
         return 3
     return -1 if i == 0 else -2
+
 
 # KKBCF
 def utility_func4(i, hand):
@@ -24,11 +25,13 @@ def utility_func4(i, hand):
         return 3
     return -1 if i == 1 else -2
 
+
 # KKBCC
 def utility_func5(i, hand):
     if list(hand).index(max(hand)) == i:
         return 4
-    return -2    
+    return -2
+
 
 # KBFF
 def utility_func6(i, hand):
@@ -37,6 +40,7 @@ def utility_func6(i, hand):
     elif i == 2:
         return -1
     return 2
+
 
 # KBFC
 def utility_func7(i, hand):
@@ -53,6 +57,7 @@ def utility_func7(i, hand):
         else:
             return -2
 
+
 # KBCF
 def utility_func8(i, hand):
     if i == 0:
@@ -68,11 +73,13 @@ def utility_func8(i, hand):
         else:
             return -2
 
+
 # KBCC
 def utility_func9(i, hand):
     if list(hand).index(max(hand)) == i:
         return 4
     return -2
+
 
 # BFF
 def utility_func10(i, hand):
@@ -81,6 +88,7 @@ def utility_func10(i, hand):
     elif i == 2:
         return -1
     return 2
+
 
 # BFC
 def utility_func11(i, hand):
@@ -91,6 +99,7 @@ def utility_func11(i, hand):
     # print temp
     m = temp.index(max(temp))
     return 3 if m == i else -2
+
 
 # BCF
 def utility_func12(i, hand):
@@ -107,13 +116,13 @@ def utility_func12(i, hand):
         else:
             return -2
 
+
 # BCC
 def utility_func13(i, hand):
-    if hand.index(max(hand)) == i :
+    if hand.index(max(hand)) == i:
         return 4
     else:
         return -2
-
 
 
 UTILITY_DICT = {

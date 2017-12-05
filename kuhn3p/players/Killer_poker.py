@@ -281,11 +281,7 @@ class SmartAgent(Player):
             pi: probability profile for player i
             pni: probability profile without player i
         """
-        if not h:
-            a = random.choice(['k', 'b'])
-            number = self.cfr(h + a, i, t, pi, pni)
-            return number
-        elif h not in Actions:
+        if h not in Actions:
             # hand_options = filter(
             #     lambda x: x[self.player] == self.card, handperm)
             hand = random.choice(handperm)

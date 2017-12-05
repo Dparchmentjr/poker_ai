@@ -227,6 +227,10 @@ tree = {
     }
 }
 
+Strategy = dict()
+
+for a in Actions:
+    Strategy[a] = dict([[k, 0] for k in Actions[a]])
 
 class SmartAgent(Player):
     def __init__(self):
@@ -234,20 +238,18 @@ class SmartAgent(Player):
         self.player = -1
         self.card = -1
         self.tables = tree
-        self.strategy = {}
+        self.strategy = Strategy
+        
+        iterations = 200
 
-        for k in Actions:
-            print k
-            self.strategy[k] = 'test'
-
-        print self.strategy
-
-        iterations = 10
         for t in range(iterations):
             i = 0        
             while i < 3:
                 self.cfr('', i, t, 1, 1)
                 i += 1
+            
+            self.perfomance.append(sum([sum(self.tables[k]['regrets'].values()) for k in self.tables]))
+            
 
         # self.get_average_strategy()
         
@@ -294,6 +296,7 @@ class SmartAgent(Player):
         Vsigma = {}
         for a in Actions:
             Vsigma[a] = dict([[k, 0] for k in Actions[a]])
+
             
         for a in Actions[h]:
             if Profile[t][h]['player'] == i:
@@ -308,7 +311,6 @@ class SmartAgent(Player):
         if Profile[t][h]['player'] == i:
             for a in Actions[h]:
                 regret = pni * (Vsigma[h][a] - vsigma)
-                self.perfomance.append(regret)
                 self.tables[h]['regrets'][a] += regret
                 self.tables[h]['strategy'][a] += pi * \
                     self.get_action_profile(t, h, a)

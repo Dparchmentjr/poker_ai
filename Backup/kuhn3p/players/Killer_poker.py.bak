@@ -1,7 +1,7 @@
-import random, matplotlib.pyplot as plt
+import random, matplotlib.pyplot as plt 
 from kuhn3p import betting, deck, Player
 import itertools
-from .player_utilities import UTILITY_DICT
+from player_utilities import UTILITY_DICT
 
 hand = [deck.JACK, deck.QUEEN, deck.KING, deck.ACE]
 handperm = list(itertools.permutations(hand, 3))
@@ -230,7 +230,6 @@ tree = {
 
 class SmartAgent(Player):
     def __init__(self):
-        super().__init__()
         self.perfomance = []
         self.player = -1
         self.card = -1
@@ -238,19 +237,20 @@ class SmartAgent(Player):
         self.strategy = {}
 
         for k in Actions:
-            print(k)
+            print k
             self.strategy[k] = 'test'
 
-        print(self.strategy)
+        print self.strategy
 
         iterations = 10
         for t in range(iterations):
-            i = 0
+            i = 0        
             while i < 3:
                 self.cfr('', i, t, 1, 1)
                 i += 1
 
         # self.get_average_strategy()
+        
 
         plt.plot(self.perfomance)
         plt.show()
@@ -263,8 +263,8 @@ class SmartAgent(Player):
         self.card = card
 
     def act(self, state, card):
-        print(('state:', state, card, self.player))
-        return betting.BET
+        print('state:', state, card, self.player)
+        betting.BET
 
     def end_hand(self, position, card, state, shown_cards):
         pass
@@ -294,14 +294,14 @@ class SmartAgent(Player):
         Vsigma = {}
         for a in Actions:
             Vsigma[a] = dict([[k, 0] for k in Actions[a]])
-
+            
         for a in Actions[h]:
             if Profile[t][h]['player'] == i:
                 Vsigma[h][a] = self.cfr(
-                    h + a, i, t, self.get_action_profile(t, h, a) * pi, pni)
+                    h + a, i, t, self.get_action_profile(t, h, a) * pi,  pni)
             else:
                 Vsigma[h][a] = self.cfr(
-                    h + a, i, t, pi, pni * self.get_action_profile(t, h, a))
+                    h + a, i, t, pi,  pni * self.get_action_profile(t, h, a))
 
             vsigma += self.get_action_profile(t, h, a) * Vsigma[h][a]
 
@@ -311,7 +311,8 @@ class SmartAgent(Player):
                 self.perfomance.append(regret)
                 self.tables[h]['regrets'][a] += regret
                 self.tables[h]['strategy'][a] += pi * \
-                                                 self.get_action_profile(t, h, a)
+                    self.get_action_profile(t, h, a)
+
 
             profile = Profile[t]
             normalization = 0
@@ -326,9 +327,9 @@ class SmartAgent(Player):
             Profile.append(profile)
         return vsigma
 
-    def get_average_strategy(self):
-        for h in Actions:
-            normalization = 0
+    def get_average_strategy(self):        
+        for h in Actions:  
+            normalization = 0 
             for a in Actions[h]:
                 normalization += self.tables[h]['strategy'][a]
 

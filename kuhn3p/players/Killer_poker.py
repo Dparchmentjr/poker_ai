@@ -1,4 +1,4 @@
-import random
+import random, matplotlib.pyplot as plt 
 from kuhn3p import betting, deck, Player
 import itertools
 from player_utilities import UTILITY_DICT
@@ -113,8 +113,7 @@ Profile = [{
     }
 }]
 
-tree = {}
-treenode = {
+tree = {
     'k': {
         'strategy': {
             'k': 0,
@@ -231,27 +230,40 @@ treenode = {
 
 class SmartAgent(Player):
     def __init__(self):
+        self.perfomance = []
         self.player = -1
         self.card = -1
-        self.tree = tree
-        self.hand_index = -1
-        self.training_hand = ()
+        self.tables = tree
+        self.strategy = {}
+
+        for k in Actions:
+            print k
+            self.strategy[k] = 'test'
+
+        print self.strategy
+
+        iterations = 10
+        for t in range(iterations):
+            i = 0        
+            while i < 3:
+                self.cfr('', i, t, 1, 1)
+                i += 1
+
+        # self.get_average_strategy()
+        
+
+        plt.plot(self.perfomance)
+        plt.show()
+
+        # for node in self.strategy:
+        #     print(node, self.strategy[node])
 
     def start_hand(self, position, card):
         self.player = position
         self.card = card
-        iterations = 50
-        i = 0
-        for t in range(iterations):
-            while i < 3:
-                self.cfr('', i, t, 1, 1)
-                i += 1
-        latest_profile = Profile[len(Profile) - 1]
-        print len(latest_profile)
-        for node in latest_profile:
-            print node, latest_profile[node]
 
     def act(self, state, card):
+        print('state:', state, card, self.player)
         betting.BET
 
     def end_hand(self, position, card, state, shown_cards):
@@ -272,56 +284,57 @@ class SmartAgent(Player):
             number = self.cfr(h + a, i, t, pi, pni)
             return number
         elif h not in Actions:
-            hand_options = filter(
-                lambda x: x[self.player] == self.card, handperm)
-            hand = random.choice(hand_options)
-            self.hand_index = str(hand)
-            self.training_hand = hand
-            self.tree[self.hand_index] = treenode
+            # hand_options = filter(
+            #     lambda x: x[self.player] == self.card, handperm)
+            hand = random.choice(handperm)
             utility = self.utility(h, i, hand)
             return utility
 
         vsigma = 0
-
-        Vsigma = {
-            'c': 0,
-            'k': 0,
-            'f': 0,
-            'b': 0
-        }
-
+        Vsigma = {}
+        for a in Actions:
+            Vsigma[a] = dict([[k, 0] for k in Actions[a]])
+            
         for a in Actions[h]:
             if Profile[t][h]['player'] == i:
-                Vsigma[a] = self.cfr(
+                Vsigma[h][a] = self.cfr(
                     h + a, i, t, self.get_action_profile(t, h, a) * pi,  pni)
             else:
-                Vsigma[a] = self.cfr(
+                Vsigma[h][a] = self.cfr(
                     h + a, i, t, pi,  pni * self.get_action_profile(t, h, a))
 
-            vsigma += self.get_action_profile(t, h, a) * Vsigma[a]
+            vsigma += self.get_action_profile(t, h, a) * Vsigma[h][a]
 
         if Profile[t][h]['player'] == i:
             for a in Actions[h]:
-                self.tree[self.hand_index][h]['regrets'][a] += pni * \
-                    (Vsigma[a] - vsigma)
-                self.tree[self.hand_index][h]['strategy'][a] += pi * \
+                regret = pni * (Vsigma[h][a] - vsigma)
+                self.perfomance.append(regret)
+                self.tables[h]['regrets'][a] += regret
+                self.tables[h]['strategy'][a] += pi * \
                     self.get_action_profile(t, h, a)
 
+
             profile = Profile[t]
+            normalization = 0
+            for a in Actions[h]:
+                actionregret = max([self.tables[h]['regrets'][a], 0])
+                normalization += actionregret
 
             for a in Actions[h]:
-                actionregret = max(
-                    [self.tree[self.hand_index][h]['regrets'][a], 0])
-                values = self.tree[self.hand_index][h]['regrets'].values()
-                normalizedsum = list(map(lambda x: max([x, 0]), values))
-                regretsum = sum(normalizedsum)
-                profile[h]['profile'][a] = actionregret / \
-                    regretsum if regretsum > 0 else 0.5
+                profile[h]['profile'][a] /= normalization if normalization > 0 else 0.5
+                # self.tables[h]['strategy'][a] += pi * profile[h]['profile'][a]
 
-            profile['hand'] = self.training_hand
-            profile['player'] = i
             Profile.append(profile)
         return vsigma
+
+    def get_average_strategy(self):        
+        for h in Actions:  
+            normalization = 0 
+            for a in Actions[h]:
+                normalization += self.tables[h]['strategy'][a]
+
+            for a in Actions[h]:
+                self.strategy[h][a] = self.tables[h]['strategy'][a] / normalization if normalization > 0 else 0.5
 
     def get_action_profile(self, t, h, a):
         profile = Profile[t][h]['profile'][a]

@@ -252,7 +252,7 @@ class SmartAgent(Player):
             print(node, latest_profile[node])
 
     def act(self, state, card):
-        betting.BET
+        return betting.BET
 
     def end_hand(self, position, card, state, shown_cards):
         pass
@@ -292,19 +292,19 @@ class SmartAgent(Player):
         for a in Actions[h]:
             if Profile[t][h]['player'] == i:
                 Vsigma[a] = self.cfr(
-                    h + a, i, t, self.get_action_profile(t, h, a) * pi,  pni)
+                    h + a, i, t, self.get_action_profile(t, h, a) * pi, pni)
             else:
                 Vsigma[a] = self.cfr(
-                    h + a, i, t, pi,  pni * self.get_action_profile(t, h, a))
+                    h + a, i, t, pi, pni * self.get_action_profile(t, h, a))
 
             vsigma += self.get_action_profile(t, h, a) * Vsigma[a]
 
         if Profile[t][h]['player'] == i:
             for a in Actions[h]:
                 self.tree[self.hand_index][h]['regrets'][a] += pni * \
-                    (Vsigma[a] - vsigma)
+                                                               (Vsigma[a] - vsigma)
                 self.tree[self.hand_index][h]['strategy'][a] += pi * \
-                    self.get_action_profile(t, h, a)
+                                                                self.get_action_profile(t, h, a)
 
             profile = Profile[t]
 
@@ -315,7 +315,7 @@ class SmartAgent(Player):
                 normalizedsum = list([max([x, 0]) for x in values])
                 regretsum = sum(normalizedsum)
                 profile[h]['profile'][a] = actionregret / \
-                    regretsum if regretsum > 0 else 0.5
+                                           regretsum if regretsum > 0 else 0.5
 
             profile['hand'] = self.training_hand
             profile['player'] = i

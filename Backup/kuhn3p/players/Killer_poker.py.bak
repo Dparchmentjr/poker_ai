@@ -1,7 +1,7 @@
 import random
 from kuhn3p import betting, deck, Player
 import itertools
-from .player_utilities import UTILITY_DICT
+from player_utilities import UTILITY_DICT
 
 hand = [deck.JACK, deck.QUEEN, deck.KING, deck.ACE]
 handperm = list(itertools.permutations(hand, 3))
@@ -247,9 +247,9 @@ class SmartAgent(Player):
                 self.cfr('', i, t, 1, 1)
                 i += 1
         latest_profile = Profile[len(Profile) - 1]
-        print(len(latest_profile))
+        print len(latest_profile)
         for node in latest_profile:
-            print(node, latest_profile[node])
+            print node, latest_profile[node]
 
     def act(self, state, card):
         betting.BET
@@ -272,7 +272,8 @@ class SmartAgent(Player):
             number = self.cfr(h + a, i, t, pi, pni)
             return number
         elif h not in Actions:
-            hand_options = [x for x in handperm if x[self.player] == self.card]
+            hand_options = filter(
+                lambda x: x[self.player] == self.card, handperm)
             hand = random.choice(hand_options)
             self.hand_index = str(hand)
             self.training_hand = hand
@@ -311,8 +312,8 @@ class SmartAgent(Player):
             for a in Actions[h]:
                 actionregret = max(
                     [self.tree[self.hand_index][h]['regrets'][a], 0])
-                values = list(self.tree[self.hand_index][h]['regrets'].values())
-                normalizedsum = list([max([x, 0]) for x in values])
+                values = self.tree[self.hand_index][h]['regrets'].values()
+                normalizedsum = list(map(lambda x: max([x, 0]), values))
                 regretsum = sum(normalizedsum)
                 profile[h]['profile'][a] = actionregret / \
                     regretsum if regretsum > 0 else 0.5

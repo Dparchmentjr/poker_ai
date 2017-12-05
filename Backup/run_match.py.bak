@@ -22,4 +22,4 @@ for hand in range(num_hands):
 		total[(first + i)%3] += delta[i]
 
 for i in range(3):
-	print(the_players[i], total[i])
+	print the_players[i], total[i]

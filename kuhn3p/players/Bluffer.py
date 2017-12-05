@@ -10,7 +10,7 @@ class Bluffer(Player):
         self.bluff = bluff
         self.rng = rng
 
-    def act(self, state, card):
+    def act(self, state, card, node = None):
         if betting.can_bet(state):
             if card < deck.ACE:
                 if self.rng.random() < self.bluff:

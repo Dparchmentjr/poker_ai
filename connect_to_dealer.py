@@ -3,14 +3,14 @@ import kuhn3p.betting, kuhn3p.deck, kuhn3p.Player
 
 import kuhn3p.players.Chump
 
-player = kuhn3p.players.Chump(1, 1, 1)
+player = kuhn3p.players.SmartAgent()
 address = sys.argv[1]
 port = int(sys.argv[2])
 
 sock = socket.create_connection((address, port))
 sockin = sock.makefile(mode='rb')
 
-sock.send('VERSION:2.0.0\r\n')
+sock.send(('VERSION:2.0.0\r\n').encode())
 
 state_regex = re.compile(r"MATCHSTATE:(\d):(\d+):([^:]*):([^|]*)\|([^|]*)\|(.*)")
 
@@ -21,9 +21,12 @@ while 1:
 
     if not line:
         break
-
+    
+    
     state = state_regex.match(line)
 
+    node = state.group(3)
+    
 
     def maybe_suited_card_string_to_card(x):
         if not (x is None) and len(x) == 2:
@@ -47,9 +50,10 @@ while 1:
     assert not (hand is None)
     if kuhn3p.betting.is_internal(betting) and kuhn3p.betting.actor(betting) == position:
         assert not (cards[position] is None)
-        action = player.act(betting, cards[position])
+        action = player.act(betting, cards[position], node)
 
         response = '%s:%s\r\n' % (line, kuhn3p.betting.action_name(betting, action))
+
         sock.send(response)
 
     if kuhn3p.betting.is_terminal(betting):

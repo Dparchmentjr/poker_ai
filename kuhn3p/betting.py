@@ -16,11 +16,13 @@
 # => there are 2*2*3 + 1 = 13 terminal betting sequences
 #
 
-CHECK = 0
-CALL = 0
-BET = 1
-FOLD = 1
+CHECK = 0 # c
+CALL = 0 #  c
+BET = 1 # r
+FOLD = 1 # f
 
+# CHECK == CALL
+# BET == RAISING
 
 def num_internal():
     return 12

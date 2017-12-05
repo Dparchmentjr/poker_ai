@@ -1,7 +1,8 @@
-import random, matplotlib.pyplot as plt, math
+import random, matplotlib.pyplot as plt, math, sys
 from kuhn3p import betting, deck, Player
 import itertools
 from .player_utilities import UTILITY_DICT
+import pandas as pd
 
 hand = [deck.JACK, deck.QUEEN, deck.KING, deck.ACE]
 handperm = list(itertools.permutations(hand, 3))
@@ -13,12 +14,12 @@ Actions = {
     'ikkb': ('c', 'f'),
     'ikkbc': ('c', 'f'),
     'ikkbf': ('c', 'f'),
-    'ikb': ('f', 'c'),
-    'ikbf': ('f', 'c'),
-    'ikbc': ('f', 'c'),
-    'ib': ('f', 'c'),
-    'ibf': ('f', 'c'),
-    'ibc': ('f', 'c'),
+    'ikb': ('c', 'f'),
+    'ikbf': ('c', 'f'),
+    'ikbc': ('c', 'f'),
+    'ib': ('c', 'f'),
+    'ibf': ('c', 'f'),
+    'ibc': ('c', 'f'),
 }
 
 
@@ -79,8 +80,8 @@ tree = {
             'c': 0
         },
         'strategy': {
-            'f': 0.5,
-            'c': 0.5
+            'c': 0.5,
+            'f': 0.5            
         }
     },
     'ikkbc': {
@@ -94,8 +95,8 @@ tree = {
             'c': 0
         },
         'strategy': {
-            'f': 0.5,
-            'c': 0.5
+            'c': 0.5,
+            'f': 0.5
         }
     },
     'ikkbf': {
@@ -109,8 +110,8 @@ tree = {
             'c': 0
         },
         'strategy': {
-            'f': 0.5,
-            'c': 0.5
+            'c': 0.5,
+            'f': 0.5            
         }
     },
     'ikb': {
@@ -124,8 +125,8 @@ tree = {
             'c': 0
         },
         'strategy': {
-            'f': 0.5,
-            'c': 0.5
+            'c': 0.5,
+            'f': 0.5            
         }
     },
     'ikbf': {
@@ -139,8 +140,8 @@ tree = {
             'c': 0
         },
         'strategy': {
-            'f': 0.5,
-            'c': 0.5
+            'c': 0.5,
+            'f': 0.5            
         }
     },
     'ikbc': {
@@ -154,8 +155,8 @@ tree = {
             'c': 0
         },
         'strategy': {
-            'f': 0.5,
-            'c': 0.5
+            'c': 0.5,
+            'f': 0.5            
         }
     },
     'ib': {
@@ -169,8 +170,8 @@ tree = {
             'c': 0
         },
         'strategy': {
-            'f': 0.5,
-            'c': 0.5
+            'c': 0.5,            
+            'f': 0.5
         }
     },
     'ibf': {
@@ -184,8 +185,8 @@ tree = {
             'c': 0
         },
         'strategy': {
-            'f': 0.5,
-            'c': 0.5
+            'c': 0.5,
+            'f': 0.5            
         }
     },
     'ibc': {
@@ -199,58 +200,82 @@ tree = {
             'c': 0
         },
         'strategy': {
-            'f': 0.5,
-            'c': 0.5
+            'c': 0.5,
+            'f': 0.5            
         }
     }
 }
 
 Strategy = dict()
 
+state_map = {
+    'i':     'i',
+    'c':     'ik',
+    'cc':    'ikk',
+    'ccr':   'ikkb',
+    'ccrf':  'ikkbf',    
+    'ccrc':  'ikkbc',
+    'cr':    'ikb',
+    'crf':   'ikbf',
+    'crc':   'ikbc',
+    'r':      'ib',
+    'rf':    'ibf',
+    'rc':    'ibc'
+}
+
 for a in Actions:
     Strategy[a] = dict([[k, 0] for k in Actions[a]])
 
 class SmartAgent(Player):
     def __init__(self):
-        super().__init__()
         self.player = -1
         self.card = -1
         self.tables = tree
         self.avg_strategy = Strategy
         self.score_perf = []
 
-        iterations = 50
+        if len(sys.argv) > 1:
+            self.train_cfr()
+
+    def train_cfr(self):
+        iterations = 10000
+        t = 0
         self.performance = [0 for _ in range(iterations)]
-        for t in range(iterations):
+        while t < iterations:
             i = 0
-            score = 0      
+            score = 0    
+            self.training_hand = random.choice(handperm)                           
             while i < 3:
-                self.training_hand = random.choice(handperm)                
                 score = self.cfr('i', i, t, .5, 1)
                 i += 1
             self.score_perf.append(score)
 
-        for i in self.tables:
-            print(i, self.tables[i])
+            if t == iterations:
+
+                self.get_average_strategy()
+
+                data = pd.Series([self.avg_strategy[n] for n in self.avg_strategy], index=[n for n in self.avg_strategy])
+                self.performance = [0 for _ in range(iterations)]
+                      
+                        
+                plt.plot(self.performance)
+                plt.show()
+
+            t = (t + 1) % iterations    
             
-        self.get_average_strategy()
-
-        for node in self.avg_strategy:
-            print(node, self.avg_strategy[node])
-
-        # plt.plot(self.score_perf)
-        plt.plot(self.performance)
-        plt.show()
-
       
 
     def start_hand(self, position, card):
         self.player = position
         self.card = card
 
-    def act(self, state, card):
-        print(('state:', state, card, self.player))
-        return betting.BET
+    def act(self, state, card, node = None):
+        if node is not None:
+            key = state_map[node] if node else state_map['i']
+            node_weights = self.avg_strategy[key]
+            node_strategy = [node_weights[k] for k in node_weights]
+            decision = node_strategy.index(max(node_strategy))
+        return decision
 
     def end_hand(self, position, card, state, shown_cards):
         pass
@@ -277,9 +302,9 @@ class SmartAgent(Player):
         }
 
         if self.tables[h]['player'] == i:
-            self.update_table(pi)
+            self.update_table(h, pi)
         else:
-            self.update_table(pni)
+            self.update_table(h, pni)
         
         for a in Actions[h]:
             if self.tables[h]['player'] == i:
@@ -299,29 +324,25 @@ class SmartAgent(Player):
                 
             assert not math.isnan(regret)
             self.tables[h]['regretSum'][a] += regret
-            if t < 5:
-                print('iteration %s for node %s' % (t, h), self.tables[h]['strategySum'])
             
-
         self.performance[t] = vsigma
         return vsigma
 
-    def update_table(self, pi):
-        for h in Actions:
-            normalization = 0
-            actionregret = {
-                    'c': 0,
-                    'b': 0,
-                    'k': 0,
-                    'f': 0
-            }                     
-            for a in Actions[h]:
-                actionregret[a] = max([self.tables[h]['regretSum'][a], 0])
-                normalization += actionregret[a]
+    def update_table(self, h, pi):
+        normalization = 0
+        actionregret = {
+                'c': 0,
+                'b': 0,
+                'k': 0,
+                'f': 0
+        }                     
+        for a in Actions[h]:
+            actionregret[a] = max([self.tables[h]['regretSum'][a], 0])
+            normalization += actionregret[a]
 
-            for a in Actions[h]:
-                self.tables[h]['strategy'][a] = actionregret[a] / normalization if normalization > 0 else 0.5
-                self.tables[h]['strategySum'][a] += pi * self.tables[h]['strategy'][a]
+        for a in Actions[h]:
+            self.tables[h]['strategy'][a] = actionregret[a] / normalization if normalization > 0 else 0.5
+            self.tables[h]['strategySum'][a] += pi * self.tables[h]['strategy'][a]
                 
                     
 
@@ -339,4 +360,4 @@ class SmartAgent(Player):
         return UTILITY_DICT.get(h[1:])(i, hand)
 
     def __str__(self):
-        return 'SmartAgeet'
+        return 'SmartAgent'

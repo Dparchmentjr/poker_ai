@@ -209,34 +209,43 @@ tree = {
 
 Strategy = dict()
 
-play_profile = {
-    'i': [0, 0],
-    'ik': [0, 0],
-    'ikk': [0, 0],
-    'ikkb': [0, 0],
-    'ikkbc': [0, 0],
-    'ikkbf': [0, 0],
-    'ikb': [0, 0],
-    'ikbf': [0, 0],
-    'ikbc': [0, 0],
-    'ib': [0, 0],
-    'ibf': [0, 0],
-    'ibc': [0, 0],
-}
+play_profile = {}
 
 state_map = {
-    'i':     'i',
-    'c':     'ik',
-    'cc':    'ikk',
-    'ccr':   'ikkb',
-    'ccrf':  'ikkbf',    
-    'ccrc':  'ikkbc',
-    'cr':    'ikb',
-    'crf':   'ikbf',
-    'crc':   'ikbc',
-    'r':      'ib',
-    'rf':    'ibf',
-    'rc':    'ibc'
+    'i':       'i',
+    'c':       'ik',
+    'cc':      'ikk',
+    'ccc':     'ikkk',      
+    'ccr':     'ikkb',
+    'ccrf':    'ikkbf',    
+    'ccrc':    'ikkbc',
+    'cr':      'ikb',
+    'crf':     'ikbf',
+    'crc':     'ikbc',
+    'r':       'ib',
+    'rf':      'ibf',
+    'rc':      'ibc',
+    'crcc':    'ikbcc',
+    'ccrcf' :  'ikkbcf',
+    'ccrcc':   'ikkbcc',
+    'ccrfc'  : 'ikkbfc',
+    'ccrff'   :'ikkbff',
+    'crfc':    'ikbfc',
+    'crff':    'ikbff',
+    'crcf' :   'ikbcf',
+    'crcc'  :  'ikbcc',
+    'rfc'     :'ibfc',
+    'rcc'     :'ibcc',
+    'rcf' :   'ibcf',
+    'rff' :   'ibff',
+}
+
+
+action_map = {
+    'k': 0,
+    'c': 0,
+    'b': 1,
+    'f': 1
 }
 
 for a in Actions:
@@ -297,6 +306,7 @@ class UltimateAiKhun(Player):
     def start_hand(self, position, card):
         self.player = position
         self.card = card
+
         player_key = 'strategy' + str(self.player)
         if player_key in self.player_strategy:
             self.avg_strategy = self.player_strategy[player_key]
@@ -307,9 +317,13 @@ class UltimateAiKhun(Player):
             for k in json_dict:
                 self.avg_strategy[k] = json.loads(json_dict[k].replace("'", '#').replace('"', "'").replace('#', '"'))
 
-        
+
+    def extract(self, x):
+        return True
+
     def act(self, state, card, node = None):
         decision = -1
+        node_history = {}
         if node is not None:
             key = state_map[node] if node else state_map['i']
             node_weights = self.avg_strategy[key]
@@ -324,19 +338,35 @@ class UltimateAiKhun(Player):
                     return numpy.random.choice([0, 1], p=[.99, .01])
                 elif betting.facing_bet(state):
                     return 1   
-            decision = numpy.random.choice([0, 1], p=node_strategy)
-            sum_ = sum(play_profile[key]) 
-            play_profile[key][decision] += 1  
+            
+            # self.decicion_nodes = filter(lambda x: tree[x]['player'] == self.player and x in , tree)
 
+            search_key = str(self.player) + str(self.card) + key
+            for k in play_profile:
+                if search_key in k:
+                    node_history[search_key + k[len(search_key)]] = play_profile[k]
+
+            
+            decision = numpy.random.choice([0, 1], p=node_strategy)
+            r = None if not node_history else max(node_history)
+
+            # applies learning throught the game with the same player, same card and same previous player history
+            if r is not None:
+                next_action = r[len(r) - 1]
+                # pick optimal decision most of the time
+                decision = numpy.random.choice([decision, action_map[next_action]], p=[.1, .9])
 
         return decision
 
     def end_hand(self, position, card, state, shown_cards):
         play_string = betting.to_string(state)
         h = state_map[play_string]
-        print(h)
-        print(position, shown_cards, h, self.utility(h, position, shown_cards))
-        pass
+        # print(position, shown_cards, h, self.utility(h, position, shown_cards))
+        profile_key = str(position) + str(card) + h 
+        if profile_key in play_profile:
+            play_profile[profile_key] += self.utility(h, position, shown_cards)
+        else:
+            play_profile[profile_key] = self.utility(h, position, shown_cards)
 
     def cfr(self, h, i, t, pi, pni):
         """

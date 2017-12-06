@@ -1,3 +1,3 @@
 from .Bluffer import Bluffer
 from .Chump import Chump
-from .Killer_poker import SmartAgent
+from .Ultimate_ai_khun import UltimateAiKhun

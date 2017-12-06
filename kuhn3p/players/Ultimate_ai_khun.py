@@ -1,8 +1,8 @@
-import random, matplotlib.pyplot as plt, math, sys
+import random, matplotlib.pyplot as plt, math, sys, numpy
 from kuhn3p import betting, deck, Player
 import itertools
 from .player_utilities import UTILITY_DICT
-import pandas as pd
+import pandas as pd, json
 
 hand = [deck.JACK, deck.QUEEN, deck.KING, deck.ACE]
 handperm = list(itertools.permutations(hand, 3))
@@ -206,6 +206,7 @@ tree = {
     }
 }
 
+
 Strategy = dict()
 
 state_map = {
@@ -226,40 +227,54 @@ state_map = {
 for a in Actions:
     Strategy[a] = dict([[k, 0] for k in Actions[a]])
 
-class SmartAgent(Player):
+class UltimateAiKhun(Player):
     def __init__(self):
         self.player = -1
         self.card = -1
         self.tables = tree
         self.avg_strategy = Strategy
         self.score_perf = []
+        self.player_strategy = {}
 
-        if len(sys.argv) > 1:
+        if len(sys.argv) > 1 and sys.argv[1] == 'train':
             self.train_cfr()
-
+         
     def train_cfr(self):
-        iterations = 10000
+        iterations = 50000
         t = 0
+        s = 50
+        hits = 0
         self.performance = [0 for _ in range(iterations)]
+        score = []
         while t < iterations:
             i = 0
-            score = 0    
             self.training_hand = random.choice(handperm)                           
             while i < 3:
-                score = self.cfr('i', i, t, .5, 1)
+                score.append(self.cfr('i', i, t, 1, 1))
                 i += 1
-            self.score_perf.append(score)
+                if abs(self.performance[t]) < 0.0000009:
+                    hits += 1
+                    
+                    if hits < 300000:
+                        print('hit')
+                        continue
 
-            if t == iterations:
+                    self.get_average_strategy()
 
-                self.get_average_strategy()
+                    data = pd.Series(self.avg_strategy)
+                    obj = data.to_csv('kuhn3p/players/strategies/strategy' + str(s) + '.csv')
+                    plt.show()
+                    s += 1
+                    hits = 0                    
+                else:
+                    hits = 0
 
-                data = pd.Series([self.avg_strategy[n] for n in self.avg_strategy], index=[n for n in self.avg_strategy])
-                self.performance = [0 for _ in range(iterations)]
-                      
-                        
-                plt.plot(self.performance)
-                plt.show()
+                print('performance at iteration %s ' % t, self.performance[t])
+
+            if t == iterations - 1:
+
+                self.performance = [0 for _ in range(iterations)] 
+                
 
             t = (t + 1) % iterations    
             
@@ -268,13 +283,38 @@ class SmartAgent(Player):
     def start_hand(self, position, card):
         self.player = position
         self.card = card
+        player_key = 'strategy' + str(self.player)
+        if player_key in self.player_strategy:
+            self.avg_strategy = self.player_strategy[player_key]
+        else:
+            data = pd.read_csv('kuhn3p/players/strategies/' + player_key +'.csv',header=None, index_col=0, delimiter=',')
+            json_dict = data[1].to_dict()
+            
+            for k in json_dict:
+                self.avg_strategy[k] = json.loads(json_dict[k].replace("'", '#').replace('"', "'").replace('#', '"'))
 
+        
     def act(self, state, card, node = None):
+        decision = -1
         if node is not None:
             key = state_map[node] if node else state_map['i']
             node_weights = self.avg_strategy[key]
             node_strategy = [node_weights[k] for k in node_weights]
-            decision = node_strategy.index(max(node_strategy))
+            if card == deck.ACE:
+                if betting.can_bet(state):
+                    return numpy.random.choice([0, 1], p=[.01, .99])
+                elif betting.facing_bet(state):
+                    return 0
+            if card == deck.JACK:
+                if betting.can_bet(state):
+                    return numpy.random.choice([0, 1], p=[.99, .01])
+                elif betting.facing_bet(state):
+                    return 1
+            if card == deck.QUEEN or card == deck.KING:
+                if self.player == 1:
+                    return numpy.random.choice([1, 0], p=node_strategy)
+            return numpy.random.choice([0, 1], p=node_strategy)
+            
         return decision
 
     def end_hand(self, position, card, state, shown_cards):
@@ -321,11 +361,13 @@ class SmartAgent(Player):
                 regret = pni * (Vsigma[a] - vsigma)
             else:
                 regret = pi * (Vsigma[a] - vsigma)
-                
+
+            self.performance[t] = regret
+            
+
             assert not math.isnan(regret)
             self.tables[h]['regretSum'][a] += regret
             
-        self.performance[t] = vsigma
         return vsigma
 
     def update_table(self, h, pi):

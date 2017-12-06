@@ -3,7 +3,7 @@ import kuhn3p.betting, kuhn3p.deck, kuhn3p.Player
 
 import kuhn3p.players.Chump
 
-player = kuhn3p.players.SmartAgent()
+player = kuhn3p.players.UltimateAiKhun()
 address = sys.argv[1]
 port = int(sys.argv[2])
 

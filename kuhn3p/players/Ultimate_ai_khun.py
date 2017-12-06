@@ -209,6 +209,21 @@ tree = {
 
 Strategy = dict()
 
+play_profile = {
+    'i': [0, 0],
+    'ik': [0, 0],
+    'ikk': [0, 0],
+    'ikkb': [0, 0],
+    'ikkbc': [0, 0],
+    'ikkbf': [0, 0],
+    'ikb': [0, 0],
+    'ikbf': [0, 0],
+    'ikbc': [0, 0],
+    'ib': [0, 0],
+    'ibf': [0, 0],
+    'ibc': [0, 0],
+}
+
 state_map = {
     'i':     'i',
     'c':     'ik',
@@ -252,11 +267,10 @@ class UltimateAiKhun(Player):
             while i < 3:
                 score.append(self.cfr('i', i, t, 1, 1))
                 i += 1
-                if abs(self.performance[t]) < 0.0000009:
+                if abs(self.performance[t]) < 0.0009:
                     hits += 1
                     
                     if hits < 300000:
-                        print('hit')
                         continue
 
                     self.get_average_strategy()
@@ -309,15 +323,19 @@ class UltimateAiKhun(Player):
                 if betting.can_bet(state):
                     return numpy.random.choice([0, 1], p=[.99, .01])
                 elif betting.facing_bet(state):
-                    return 1
-            if card == deck.QUEEN or card == deck.KING:
-                if self.player == 1:
-                    return numpy.random.choice([1, 0], p=node_strategy)
-            return numpy.random.choice([0, 1], p=node_strategy)
-            
+                    return 1   
+            decision = numpy.random.choice([0, 1], p=node_strategy)
+            sum_ = sum(play_profile[key]) 
+            play_profile[key][decision] += 1  
+
+
         return decision
 
     def end_hand(self, position, card, state, shown_cards):
+        play_string = betting.to_string(state)
+        h = state_map[play_string]
+        print(h)
+        print(position, shown_cards, h, self.utility(h, position, shown_cards))
         pass
 
     def cfr(self, h, i, t, pi, pni):

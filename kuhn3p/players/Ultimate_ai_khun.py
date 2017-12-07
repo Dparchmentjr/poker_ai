@@ -10,9 +10,7 @@ from .player_utilities import UTILITY_DICT
 import pandas as pd
 import json
 
-hand = [deck.JACK, deck.QUEEN, deck.KING, deck.ACE]
-handperm = list(itertools.permutations(hand, 3))
-
+handperm = list(itertools.permutations([deck.JACK, deck.QUEEN, deck.KING, deck.ACE], 3))
 Actions = {
     'i': ('k', 'b'),
     'ik': ('k', 'b'),
@@ -273,21 +271,21 @@ class UltimateAiKhun(Player):
 
     def train_cfr(self):
         iterations = int(sys.argv[2])
-        s = 1
+        s = 0
         t = 0
         p1 = 1
-        p2 = .89
+        p2 = 1
         p3 = 1
         hits = 0
 
         self.performance = [0 for _ in range(iterations)]
         score = []
         while t < iterations:
-            i = 0
+            i = 2
             self.training_hand = random.choice(handperm)
-            while i < 3:
+            while i >= 0:
                 score.append(self.cfr('i', i, t, p1, p2, p3))
-                i += 1
+                i -= 1
                 print('performance at iteration %s ' %
                       t, abs(self.performance[t]))
                 if abs(self.performance[t]) < 0.00009:
@@ -319,6 +317,7 @@ class UltimateAiKhun(Player):
         plt.plot(self.performance[:t])
         plt.show()
 
+
     def start_hand(self, position, card):
         global game_t
         game_t += 1
@@ -328,13 +327,16 @@ class UltimateAiKhun(Player):
         if player_key in self.player_strategy:
             self.avg_strategy = self.player_strategy[player_key]
         else:
-            data = pd.read_csv('kuhn3p/players/strategies/strategy0' +
-                               '.csv', header=None, index_col=0, delimiter=',')
+            data = pd.read_csv('kuhn3p/players/strategies/strategy1' + 
+                                # str(random.randint(0, 0)) + 
+                                '.csv', header=None, index_col=0, delimiter=',')
             json_dict = data[1].to_dict()
 
             for k in json_dict:
                 self.avg_strategy[k] = json.loads(json_dict[k].replace(
                     "'", '#').replace('"', "'").replace('#', '"'))
+
+            # self.player_strategy[player_key] = self.avg_strategy
 
     def extract(self, x):
         return True
@@ -350,30 +352,31 @@ class UltimateAiKhun(Player):
             node_strategy = [node_weights[k] for k in node_weights]
             if card == deck.ACE:
                 if betting.can_bet(state):
-                    return numpy.random.choice([0, 1], p=[.05, .95])
+                    return numpy.random.choice([0, 1], p=[.10, .90])
                 elif betting.facing_bet(state):
                     return 0
             if card == deck.JACK:
                 if betting.can_bet(state):
-                    return numpy.random.choice([0, 1], p=[.99, .01])
+                    return numpy.random.choice([0, 1], p=[.9, .1])
                 elif betting.facing_bet(state):
-                    return 1
+                    return numpy.random.choice([1, 0], p=[.9, .1])
 
             search_key = str(self.player) + str(self.card) + key
-
             decision = numpy.random.choice([0, 1], p=node_strategy)
+            
+            if betting.facing_bet(state) and game_t > 300 and key in self.card_profile:
+                length = len(key)
+                if key[length - 1] != 'f':
+                    search_nodes.append(key[:length - 1])
+                if key[length - 1] == 'c':
+                    search_nodes.append(key[:length - 2])
+                profile_key = k
 
-            if betting.facing_bet(state) and game_t > 300:
-                for k in self.card_profile:
-                    if search_key in k:
-                        search_nodes.append(key[:len(search_key) - 3])
-                        search_nodes.append(key[:len(search_key) - 4])
-                        profile_key = k
-                        break
                 cards_dist = {}
                 cards_pred = {}
-                if profile_key:
-                    card_profile = self.card_profile[profile_key]
+
+                if search_nodes:
+                    card_profile = self.card_profile
                     for k in search_nodes:
                         if k in card_profile:
                             cards_dist[k] = card_profile[k]
@@ -387,43 +390,41 @@ class UltimateAiKhun(Player):
                         cards_pred[k] = cards_dist[k].index(cards_pred[k])
                         cards_dist[k] = prob
                         
-                    
-                    print(cards_pred, cards_dist)
-                    # if card_pred >= 0 and card > card_pred and card != 1:
-                    #     decision = numpy.random.choice(
-                    #         [0, 1], p=[card_prob, 1 - card_prob])
-                    #     print('player %s predicted card %s pred %s choosing to %s at node %s with card %s' % (
-                    #             str(self.player), str(card_pred), str(card_prob), str(decision), key, str(card)))
-                    # else:
-                    #     print('predicted card and info', card_pred, self.player, key)
-                    #     return numpy.random.choice
-                            
-
+                    if key[length - 1] == 'f':
+                        pred = -1
+                        prob = 0
+                        for k in cards_dist:
+                            pred = cards_pred[k]
+                            prob = cards_dist[k]
+                        if card_pred >= 0 and card > card_pred:
+                            decision = numpy.random.choice(
+                                [0, 1], p=[prob, 1 - prob])
+                            print('player %s predicted card %s pred %s choosing to %s at node %s with card %s' % (
+                                    str(self.player), str(card_pred), str(card_prob), str(decision), key, str(card)))
+                    elif key[length - 1] == 'b':
+                        bet_card = cards_pred[key[:length - 1]]
+                        prob = cards_dist[key[:length - 1]]
+                        if card > bet_card:
+                            decision = numpy.random.choice([0, 1], p=[prob, 1 - prob])
         return decision
 
     def end_hand(self, position, card, state, shown_cards):
-        print(shown_cards)
         play_string = betting.to_string(state)
         h = state_map[play_string]
-        profile_key = str(position) + str(card) + h
+        profile_key =  h
         node = ''
         for i in h[:len(h) - 1]:
             node += i
             card = shown_cards[position]
-            if tree[node]['player'] != position:
-                p = self.tables[node]['player']
+            p = self.tables[node]['player']
+            if p != position:
                 c = shown_cards[p]
                 if c is not None:
-                    if profile_key in self.card_profile:
-                        if node in self.card_profile[profile_key]:
-                            self.card_profile[profile_key][node][c] += 1
-                        else:
-                            self.card_profile[profile_key][node] = [0, 0, 0, 0]
-                            self.card_profile[profile_key][node][c] += 1
+                    if node in self.card_profile:
+                        self.card_profile[node][c] += 1
                     else:
-                        self.card_profile[profile_key] = {}
-                        self.card_profile[profile_key][node] = [0, 0, 0, 0]
-                        self.card_profile[profile_key][node][c] += 1
+                        self.card_profile[node] = [0, 0, 0, 0]
+                        self.card_profile[node][c] += 1
 
     def cfr(self, h, i, t, pi, pi2, pi3):
         """
@@ -513,4 +514,4 @@ class UltimateAiKhun(Player):
         return UTILITY_DICT.get(h[1:])(i, hand)
 
     def __str__(self):
-        return 'SmartAgent'
+        return 'UltimateAiKhun'

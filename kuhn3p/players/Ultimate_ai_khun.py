@@ -1,8 +1,14 @@
-import random, matplotlib.pyplot as plt, math, sys, numpy
+import random
+import matplotlib.pyplot as plt
+import math
+import sys
+import numpy
 from kuhn3p import betting, deck, Player
+from time import sleep
 import itertools
 from .player_utilities import UTILITY_DICT
-import pandas as pd, json
+import pandas as pd
+import json
 
 hand = [deck.JACK, deck.QUEEN, deck.KING, deck.ACE]
 handperm = list(itertools.permutations(hand, 3))
@@ -25,7 +31,7 @@ Actions = {
 
 tree = {
     'i': {
-        'player': 0,        
+        'player': 0,
         'strategySum': {
             'k': 0,
             'b': 0
@@ -40,7 +46,7 @@ tree = {
         }
     },
     'ik': {
-        'player': 1,        
+        'player': 1,
         'strategySum': {
             'k': 0,
             'b': 0
@@ -50,12 +56,12 @@ tree = {
             'b': 0
         },
         'strategy': {
-            'k':0.5,
+            'k': 0.5,
             'b': 0.5
         }
     },
     'ikk': {
-        'player': 2,        
+        'player': 2,
         'strategySum': {
             'k': 0,
             'b': 0
@@ -70,7 +76,7 @@ tree = {
         },
     },
     'ikkb': {
-        'player': 0,        
+        'player': 0,
         'strategySum': {
             'f': 0,
             'c': 0
@@ -81,11 +87,11 @@ tree = {
         },
         'strategy': {
             'c': 0.5,
-            'f': 0.5            
+            'f': 0.5
         }
     },
     'ikkbc': {
-        'player': 1,        
+        'player': 1,
         'strategySum': {
             'f': 0,
             'c': 0
@@ -100,7 +106,7 @@ tree = {
         }
     },
     'ikkbf': {
-        'player': 1,        
+        'player': 1,
         'strategySum': {
             'f': 0,
             'c': 0
@@ -111,11 +117,11 @@ tree = {
         },
         'strategy': {
             'c': 0.5,
-            'f': 0.5            
+            'f': 0.5
         }
     },
     'ikb': {
-        'player': 2,        
+        'player': 2,
         'strategySum': {
             'f': 0,
             'c': 0
@@ -126,11 +132,11 @@ tree = {
         },
         'strategy': {
             'c': 0.5,
-            'f': 0.5            
+            'f': 0.5
         }
     },
     'ikbf': {
-        'player': 0,        
+        'player': 0,
         'strategySum': {
             'f': 0,
             'c': 0
@@ -141,11 +147,11 @@ tree = {
         },
         'strategy': {
             'c': 0.5,
-            'f': 0.5            
+            'f': 0.5
         }
     },
     'ikbc': {
-        'player': 0,        
+        'player': 0,
         'strategySum': {
             'f': 0,
             'c': 0
@@ -156,11 +162,11 @@ tree = {
         },
         'strategy': {
             'c': 0.5,
-            'f': 0.5            
+            'f': 0.5
         }
     },
     'ib': {
-        'player': 1,        
+        'player': 1,
         'strategySum': {
             'f': 0,
             'c': 0
@@ -170,12 +176,12 @@ tree = {
             'c': 0
         },
         'strategy': {
-            'c': 0.5,            
+            'c': 0.5,
             'f': 0.5
         }
     },
     'ibf': {
-        'player': 2,        
+        'player': 2,
         'strategySum': {
             'f': 0,
             'c': 0
@@ -186,11 +192,11 @@ tree = {
         },
         'strategy': {
             'c': 0.5,
-            'f': 0.5            
+            'f': 0.5
         }
     },
     'ibc': {
-        'player': 2,        
+        'player': 2,
         'strategySum': {
             'f': 0,
             'c': 0
@@ -201,7 +207,7 @@ tree = {
         },
         'strategy': {
             'c': 0.5,
-            'f': 0.5            
+            'f': 0.5
         }
     }
 }
@@ -209,15 +215,14 @@ tree = {
 
 Strategy = dict()
 
-play_profile = {}
 
 state_map = {
     'i':       'i',
     'c':       'ik',
     'cc':      'ikk',
-    'ccc':     'ikkk',      
+    'ccc':     'ikkk',
     'ccr':     'ikkb',
-    'ccrf':    'ikkbf',    
+    'ccrf':    'ikkbf',
     'ccrc':    'ikkbc',
     'cr':      'ikb',
     'crf':     'ikbf',
@@ -226,18 +231,18 @@ state_map = {
     'rf':      'ibf',
     'rc':      'ibc',
     'crcc':    'ikbcc',
-    'ccrcf' :  'ikkbcf',
+    'ccrcf':  'ikkbcf',
     'ccrcc':   'ikkbcc',
-    'ccrfc'  : 'ikkbfc',
-    'ccrff'   :'ikkbff',
+    'ccrfc': 'ikkbfc',
+    'ccrff': 'ikkbff',
     'crfc':    'ikbfc',
     'crff':    'ikbff',
-    'crcf' :   'ikbcf',
-    'crcc'  :  'ikbcc',
-    'rfc'     :'ibfc',
-    'rcc'     :'ibcc',
-    'rcf' :   'ibcf',
-    'rff' :   'ibff',
+    'crcf':   'ikbcf',
+    'crcc':  'ikbcc',
+    'rfc': 'ibfc',
+    'rcc': 'ibcc',
+    'rcf':   'ibcf',
+    'rff':   'ibff',
 }
 
 
@@ -251,6 +256,9 @@ action_map = {
 for a in Actions:
     Strategy[a] = dict([[k, 0] for k in Actions[a]])
 
+game_t = 0
+
+
 class UltimateAiKhun(Player):
     def __init__(self):
         self.player = -1
@@ -259,116 +267,165 @@ class UltimateAiKhun(Player):
         self.avg_strategy = Strategy
         self.score_perf = []
         self.player_strategy = {}
-
+        self.card_profile = {}
         if len(sys.argv) > 1 and sys.argv[1] == 'train':
             self.train_cfr()
-         
+
     def train_cfr(self):
-        iterations = 50000
+        iterations = int(sys.argv[2])
+        s = 1
         t = 0
-        s = 50
+        p1 = 1
+        p2 = .89
+        p3 = 1
         hits = 0
+
         self.performance = [0 for _ in range(iterations)]
         score = []
         while t < iterations:
             i = 0
-            self.training_hand = random.choice(handperm)                           
+            self.training_hand = random.choice(handperm)
             while i < 3:
-                score.append(self.cfr('i', i, t, 1, 1))
+                score.append(self.cfr('i', i, t, p1, p2, p3))
                 i += 1
-                if abs(self.performance[t]) < 0.0009:
+                print('performance at iteration %s ' %
+                      t, abs(self.performance[t]))
+                if abs(self.performance[t]) < 0.00009:
                     hits += 1
-                    
-                    if hits < 300000:
-                        continue
+                    if hits == 1500:
+                        plt.plot(self.performance[:t])
+                        plt.show()
+                        self.get_average_strategy()
+                        data = pd.Series(self.avg_strategy)
+                        self.tables = tree
 
-                    self.get_average_strategy()
-
-                    data = pd.Series(self.avg_strategy)
-                    obj = data.to_csv('kuhn3p/players/strategies/strategy' + str(s) + '.csv')
-                    plt.show()
-                    s += 1
-                    hits = 0                    
+                        print(self.avg_strategy)
+                        data.to_csv('kuhn3p/players/strategies/strategy' +
+                                    str(p1) + '|' + str(p2) + '|' + str(p3) + str(s) + '.csv')
+                        sleep(10)
+                        hits = 0
+                        s += 1
                 else:
                     hits = 0
+            t += 1
 
-                print('performance at iteration %s ' % t, self.performance[t])
+        self.get_average_strategy()
+        data = pd.Series(self.avg_strategy)
+        self.tables = tree
 
-            if t == iterations - 1:
-
-                self.performance = [0 for _ in range(iterations)] 
-                
-
-            t = (t + 1) % iterations    
-            
-      
+        print(self.avg_strategy)
+        data.to_csv('kuhn3p/players/strategies/substrategy' +
+                    str(p1) + '|' + str(p2) + '|' + str(p3) + str(s) + '.csv')
+        plt.plot(self.performance[:t])
+        plt.show()
 
     def start_hand(self, position, card):
+        global game_t
+        game_t += 1
         self.player = position
         self.card = card
-
         player_key = 'strategy' + str(self.player)
         if player_key in self.player_strategy:
             self.avg_strategy = self.player_strategy[player_key]
         else:
-            data = pd.read_csv('kuhn3p/players/strategies/' + player_key +'.csv',header=None, index_col=0, delimiter=',')
+            data = pd.read_csv('kuhn3p/players/strategies/strategy0' +
+                               '.csv', header=None, index_col=0, delimiter=',')
             json_dict = data[1].to_dict()
-            
-            for k in json_dict:
-                self.avg_strategy[k] = json.loads(json_dict[k].replace("'", '#').replace('"', "'").replace('#', '"'))
 
+            for k in json_dict:
+                self.avg_strategy[k] = json.loads(json_dict[k].replace(
+                    "'", '#').replace('"', "'").replace('#', '"'))
 
     def extract(self, x):
         return True
 
-    def act(self, state, card, node = None):
+    def act(self, state, card, node=None):
+        global game_t
         decision = -1
-        node_history = {}
+        search_nodes = []
+        profile_key = ''
         if node is not None:
             key = state_map[node] if node else state_map['i']
             node_weights = self.avg_strategy[key]
             node_strategy = [node_weights[k] for k in node_weights]
             if card == deck.ACE:
                 if betting.can_bet(state):
-                    return numpy.random.choice([0, 1], p=[.01, .99])
+                    return numpy.random.choice([0, 1], p=[.05, .95])
                 elif betting.facing_bet(state):
                     return 0
             if card == deck.JACK:
                 if betting.can_bet(state):
                     return numpy.random.choice([0, 1], p=[.99, .01])
                 elif betting.facing_bet(state):
-                    return 1   
-            
-            # self.decicion_nodes = filter(lambda x: tree[x]['player'] == self.player and x in , tree)
+                    return 1
 
             search_key = str(self.player) + str(self.card) + key
-            for k in play_profile:
-                if search_key in k:
-                    node_history[search_key + k[len(search_key)]] = play_profile[k]
 
-            
             decision = numpy.random.choice([0, 1], p=node_strategy)
-            r = None if not node_history else max(node_history)
 
-            # applies learning throught the game with the same player, same card and same previous player history
-            if r is not None:
-                next_action = r[len(r) - 1]
-                # pick optimal decision most of the time
-                decision = numpy.random.choice([decision, action_map[next_action]], p=[.1, .9])
+            if betting.facing_bet(state) and game_t > 300:
+                for k in self.card_profile:
+                    if search_key in k:
+                        search_nodes.append(key[:len(search_key) - 3])
+                        search_nodes.append(key[:len(search_key) - 4])
+                        profile_key = k
+                        break
+                cards_dist = {}
+                cards_pred = {}
+                if profile_key:
+                    card_profile = self.card_profile[profile_key]
+                    for k in search_nodes:
+                        if k in card_profile:
+                            cards_dist[k] = card_profile[k]
+                            cards_pred[k] = max(cards_dist[k])
+                            # print(key, cards_dist)
+
+                    for k in cards_dist:
+                        normalization = float(sum(cards_dist[k]))
+                        freq = float(cards_pred[k])
+                        prob = numpy.divide(freq, normalization)
+                        cards_pred[k] = cards_dist[k].index(cards_pred[k])
+                        cards_dist[k] = prob
+                        
+                    
+                    print(cards_pred, cards_dist)
+                    # if card_pred >= 0 and card > card_pred and card != 1:
+                    #     decision = numpy.random.choice(
+                    #         [0, 1], p=[card_prob, 1 - card_prob])
+                    #     print('player %s predicted card %s pred %s choosing to %s at node %s with card %s' % (
+                    #             str(self.player), str(card_pred), str(card_prob), str(decision), key, str(card)))
+                    # else:
+                    #     print('predicted card and info', card_pred, self.player, key)
+                    #     return numpy.random.choice
+                            
 
         return decision
 
     def end_hand(self, position, card, state, shown_cards):
+        print(shown_cards)
         play_string = betting.to_string(state)
         h = state_map[play_string]
-        # print(position, shown_cards, h, self.utility(h, position, shown_cards))
-        profile_key = str(position) + str(card) + h 
-        if profile_key in play_profile:
-            play_profile[profile_key] += self.utility(h, position, shown_cards)
-        else:
-            play_profile[profile_key] = self.utility(h, position, shown_cards)
+        profile_key = str(position) + str(card) + h
+        node = ''
+        for i in h[:len(h) - 1]:
+            node += i
+            card = shown_cards[position]
+            if tree[node]['player'] != position:
+                p = self.tables[node]['player']
+                c = shown_cards[p]
+                if c is not None:
+                    if profile_key in self.card_profile:
+                        if node in self.card_profile[profile_key]:
+                            self.card_profile[profile_key][node][c] += 1
+                        else:
+                            self.card_profile[profile_key][node] = [0, 0, 0, 0]
+                            self.card_profile[profile_key][node][c] += 1
+                    else:
+                        self.card_profile[profile_key] = {}
+                        self.card_profile[profile_key][node] = [0, 0, 0, 0]
+                        self.card_profile[profile_key][node][c] += 1
 
-    def cfr(self, h, i, t, pi, pni):
+    def cfr(self, h, i, t, pi, pi2, pi3):
         """
         @Description: counter factual regret recursive function
         @Params:
@@ -389,52 +446,58 @@ class UltimateAiKhun(Player):
             'f': 0
         }
 
-        if self.tables[h]['player'] == i:
+        if i == 0:
             self.update_table(h, pi)
-        else:
-            self.update_table(h, pni)
-        
+        elif i == 1:
+            self.update_table(h, pi2)
+        elif i == 2:
+            self.update_table(h, pi3)
+
         for a in Actions[h]:
-            if self.tables[h]['player'] == i:
+            if i == 0:
                 Vsigma[a] = self.cfr(
-                    h + a, i, t, self.tables[h]['strategy'][a] * pi, pni)
-            else:
+                    h + a, i, t, self.tables[h]['strategy'][a] * pi, pi2, pi3)
+            elif i == 1:
                 Vsigma[a] = self.cfr(
-                    h + a, i, t, pi, pni * self.tables[h]['strategy'][a])
+                    h + a, i, t, pi, pi2 * self.tables[h]['strategy'][a], pi3)
+            elif i == 2:
+                Vsigma[a] = self.cfr(
+                    h + a, i, t, pi, pi2, self.tables[h]['strategy'][a] * pi3)
 
             vsigma += self.tables[h]['strategy'][a] * Vsigma[a]
 
-        for a in Actions[h]:   
-            if self.tables[h]['player'] == i:        
-                regret = pni * (Vsigma[a] - vsigma)
-            else:
-                regret = pi * (Vsigma[a] - vsigma)
+        for a in Actions[h]:
+            if i == 0:
+                regret = pi2 * pi3 * (Vsigma[a] - vsigma)
+            elif i == 1:
+                regret = pi * pi3 * (Vsigma[a] - vsigma)
+            elif i == 2:
+                regret = pi * pi2 * (Vsigma[a] - vsigma)
 
             self.performance[t] = regret
-            
 
             assert not math.isnan(regret)
             self.tables[h]['regretSum'][a] += regret
-            
+
         return vsigma
 
     def update_table(self, h, pi):
         normalization = 0
         actionregret = {
-                'c': 0,
-                'b': 0,
-                'k': 0,
-                'f': 0
-        }                     
+            'c': 0,
+            'b': 0,
+            'k': 0,
+            'f': 0
+        }
         for a in Actions[h]:
             actionregret[a] = max([self.tables[h]['regretSum'][a], 0])
             normalization += actionregret[a]
 
         for a in Actions[h]:
-            self.tables[h]['strategy'][a] = actionregret[a] / normalization if normalization > 0 else 0.5
-            self.tables[h]['strategySum'][a] += pi * self.tables[h]['strategy'][a]
-                
-                    
+            self.tables[h]['strategy'][a] = actionregret[a] / \
+                normalization if normalization > 0 else 0.5
+            self.tables[h]['strategySum'][a] += pi * \
+                self.tables[h]['strategy'][a]
 
     def get_average_strategy(self):
         for h in Actions:
@@ -443,8 +506,8 @@ class UltimateAiKhun(Player):
                 normalization += self.tables[h]['strategySum'][a]
 
             for a in Actions[h]:
-                self.avg_strategy[h][a] = self.tables[h]['strategySum'][a] / normalization if normalization > 0 else 0.5
-
+                self.avg_strategy[h][a] = self.tables[h]['strategySum'][a] / \
+                    normalization if normalization > 0 else 0.5
 
     def utility(self, h, i, hand):
         return UTILITY_DICT.get(h[1:])(i, hand)
